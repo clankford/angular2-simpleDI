@@ -9,6 +9,7 @@ import { ServiceSelector } from './components/ServiceSelectorComponent';
     directives: [ServiceSelector],
     template: `
     <button (click)="invokeService()">Get Value</button>
+    <button (click)="useInjectors()">User Injectors</button>
     <service-selector></service-selector>
     `
 })
@@ -23,6 +24,17 @@ class SimpleDiApp {
     
     invokeService(): void {
         console.log('MyService returned', this.myService.getValue());
+    }
+    
+    useInjectors(): void {
+        let injector: any = ReflectiveInjector.resolveAndCreate([
+            ViewPortService,
+            provide('OtherSizeService', {useFactory: (viewport: any) => {
+                return viewport.determineService();
+            }, deps: [ViewPortService]})
+        ]);
+        let sizeService: any = injector.get('OtherSizeService');
+        sizeService.run();
     }
 }
 
