@@ -1,11 +1,15 @@
-import { Component, ReflectiveInjector } from '@angular/core';
+import { Component, ReflectiveInjector, provide } from '@angular/core';
 import { bootstrap } from '@angular/platform-browser-dynamic';
 import { MyService } from './services/MyService';
+import { ViewPortService } from './services/ViewPortService';
+import { ServiceSelector } from './components/ServiceSelectorComponent';
 
 @Component({
     selector: 'simple-di-app',
+    directives: [ServiceSelector],
     template: `
     <button (click)="invokeService()">Get Value</button>
+    <service-selector></service-selector>
     `
 })
 class SimpleDiApp {
@@ -22,4 +26,11 @@ class SimpleDiApp {
     }
 }
 
-bootstrap(SimpleDiApp).catch((err: any) => console.error(err));
+bootstrap(SimpleDiApp, [
+    MyService,
+    ViewPortService,
+    provide('MyServiceAlias', {useExisting: MyService}),
+    provide('SizeService', {useFactory: (viewport: any) => {
+        return viewport.determineService();
+    }, deps: [ViewPortService]})
+]).catch((err: any) => console.error(err));
